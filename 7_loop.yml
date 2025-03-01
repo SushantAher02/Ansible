@@ -1,0 +1,35 @@
+- name: Install and Configure LEMP Stack
+  hosts: localhost
+  become: true
+  connection: local
+
+  tasks:
+    - name: Install LEMP stack packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - php
+        - php8.3-fpm
+        - mariadb-server
+
+    - name: Start all services
+      service:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - nginx
+        - php8.3-fpm
+        - mariadb
+      notify: Restart services
+
+  handlers:
+    - name: Restart services
+      service:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - nginx
+        - php8.3-fpm
+        - mariadb

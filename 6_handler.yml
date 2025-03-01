@@ -1,0 +1,67 @@
+- name: Setup LEMP Stack
+  hosts: localhost
+  become: true
+  connection: local
+
+  tasks:
+    - name: Stop Apache service
+      service:
+        name: apache2
+        state: stopped
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start Nginx service
+      service:
+        name: nginx
+        state: started
+      notify: restart nginx service
+
+    - name: Install PHP
+      apt:
+        name: php
+        state: present
+
+    - name: Install PHP 8.3-FPM
+      apt:
+        name: php8.3-fpm
+        state: present
+
+    - name: Start PHP-FPM service
+      service:
+        name: php8.3-fpm
+        state: started
+      notify: restart nginx service
+      notify: restart php-fpm service
+
+    - name: Install MariaDB (MySQL)
+      apt:
+        name: mariadb-server
+        state: present
+
+    - name: Start MySQL service
+      service:
+        name: mariadb
+        state: started
+      notify: restart nginx service
+      notify: restart php-fpm service
+      notify: restart mysql service
+
+  handlers:
+    - name: restart nginx service
+      service:
+        name: nginx
+        state: restarted
+
+    - name: restart php-fpm service
+      service:
+        name: php8.3-fpm
+        state: restarted
+
+    - name: restart mysql service
+      service:
+        name: mariadb
+        state: restarted

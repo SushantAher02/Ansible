@@ -1,0 +1,16 @@
+#only code optimization
+
+
+
+- name: myplay1
+  hosts: localhost
+  become: true
+  connection: local
+  tasks:
+   - name: install nginx
+     apt: name=nginx  state=present
+   - name: start nginx service
+     service: name=nginx state=started
+
+
+#ansible-playbook 9_myplay.yml     
