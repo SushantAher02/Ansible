@@ -1,0 +1,80 @@
+- name: Setup LEMP Stack
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Update package manager in Ubuntu
+      apt:
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Update package manager in Amazon Linux
+      dnf:
+        name: '*'
+        state: latest
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Install LEMP stack on Ubuntu server
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nginx
+        - php
+        - php8.3-fpm
+        - mariadb-server
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install LEMP stack on Amazon Linux server
+      dnf:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nginx
+        - php
+        - mariadb105-server
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
+    - name: Start services on Ubuntu server
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - nginx
+        - php8.3-fpm
+        - mariadb
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Start services on Amazon Linux server
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - nginx
+        - php-fpm
+        - mariadb
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Restart services on Ubuntu server
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - nginx
+        - php8.3-fpm
+        - mariadb
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Restart services on Amazon Linux server
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - nginx
+        - php-fpm
+        - mariadb
+      when: ansible_facts['os_family'] == "RedHat"

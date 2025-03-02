@@ -1,0 +1,74 @@
+- name: Install LEMP Stack
+  hosts: webserver
+  become: true
+  tasks:
+    - name: Update package manager in Ubuntu
+      shell: apt update
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Update package manager in Amazon Linux
+      dnf:
+        name: '*'
+        state: latest
+      when: ansible_facts['distribution'] == "Amazon"
+
+    - name: Install LEMP on Ubuntu server
+      apt:
+        name: "{{ item }}"
+        state: present
+      when: ansible_facts['distribution'] == "Ubuntu"
+      loop:
+        - nginx
+        - php
+        - php8.3-fpm
+        - mariadb-server
+
+    - name: Install LEMP on Amazon Linux server
+      dnf:
+        name: "{{ item }}"
+        state: present
+      when: ansible_facts['distribution'] == "Amazon"
+      loop:
+        - nginx
+        - php
+        - mariadb105-server
+
+    - name: Start all services on Ubuntu server
+      service:
+        name: "{{ item }}"
+        state: started
+      when: ansible_facts['distribution'] == "Ubuntu"
+      loop:
+        - nginx
+        - php8.3-fpm
+        - mariadb
+
+    - name: Start all services on Amazon Linux server
+      service:
+        name: "{{ item }}"
+        state: started
+      when: ansible_facts['distribution'] == "Amazon"
+      loop:
+        - nginx
+        - php-fpm
+        - mariadb
+
+    - name: Restart all services on Ubuntu server
+      service:
+        name: "{{ item }}"
+        state: restarted
+      when: ansible_facts['distribution'] == "Ubuntu"
+      loop:
+        - nginx
+        - php8.3-fpm
+        - mariadb
+
+    - name: Restart all services on Amazon Linux server
+      service:
+        name: "{{ item }}"
+        state: restarted
+      when: ansible_facts['distribution'] == "Amazon"
+      loop:
+        - nginx
+        - php-fpm
+        - mariadb
